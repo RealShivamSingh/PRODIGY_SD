@@ -1,0 +1,36 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+# Function to extract product data from a webpage
+def extract_product_data(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    products = []
+    for product in soup.select('.product'):  # Update the selector according to the website's structure
+        name = product.select_one('.product-name').get_text(strip=True)
+        price = product.select_one('.product-price').get_text(strip=True)
+        rating = product.select_one('.product-rating').get_text(strip=True)
+        products.append([name, price, rating])
+    
+    return products
+
+# Function to save data to CSV
+def save_to_csv(products, filename='products.csv'):
+    with open(filename, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Name', 'Price', 'Rating'])
+        writer.writerows(products)
+
+# URL of the e-commerce website (replace with actual URL)
+url = 'https://example.com/products'
+
+# Extract product data and save to CSV
+products = extract_product_data(url)
+save_to_csv(products)
+
+print(f"Scraped data has been saved to products.csv")
